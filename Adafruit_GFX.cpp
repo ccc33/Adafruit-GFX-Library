@@ -33,8 +33,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "Adafruit_GFX.h"
 #include "glcdfont.c"
-#include <math.h>
-#define PI 3.1415926
 #ifdef __AVR__
   #include <avr/pgmspace.h>
 #elif defined(ESP8266) || defined(ESP32)
@@ -84,6 +82,29 @@ WIDTH(w), HEIGHT(h)
     wrap      = true;
     _cp437    = false;
     gfxFont   = NULL;
+}
+
+//Draw a Pentagram
+void Adafruit_GFX::drawMyPentagram(int16_t ox, int16_t oy,
+    int16_t r, uint16_t color) {
+    int16_t p1x,p1y,p2x,p2y,p3x,p3y,p4x,p4y,p5x,p5y;
+
+    p1x = ox;
+    p1y = oy + r;
+    p2x = ox - r * cos(18 * PI /180);
+    p2y = oy + r * sin(18 * PI /180);
+    p3x = ox - r * cos(54 * PI /180);
+    p3y = oy - r * sin(54 * PI /180);
+    p4x = ox + r * cos(54 * PI /180);
+    p4y = oy - r * sin(54 * PI /180);
+    p5x = ox + r * cos(18 * PI /180);
+    p5y = oy + r * sin(18 * PI /180);
+
+    drawLine(p1x, p1y, p3x, p3y, color);
+    drawLine(p2x, p2y, p4x, p4y, color);
+    drawLine(p3x, p3y, p5x, p5y, color);
+    drawLine(p1x, p1y, p4x, p4y, color);
+    drawLine(p2x, p2y, p5x, p5y, color);
 }
 
 // Bresenham's algorithm - thx wikpedia
@@ -369,47 +390,6 @@ void Adafruit_GFX::fillRoundRect(int16_t x, int16_t y, int16_t w,
     fillCircleHelper(x+r    , y+r, r, 2, h-2*r-1, color);
     endWrite();
 }
-
-// Draw a Pentagram
-void Adafruit_GFX::drawPentagram(int16_t x0, int16_t y0,
-        int16_t r0, uint16_t color) {
-	int xa, ya;
-    int xb, yb;
-    int xc, yc;
-    int xd, yd;
-    int xe, ye;
-    xa = x0;
-    ya = y0 - r0;
-    xb = x0 - r0 * sin(PI / 180 * 72);
-    yb = y0 + r0 * -(cos(PI / 180 * 72));
-    xc = x0 - r0 * -(sin(PI / 180 * 36));
-    yc = y0 - r0 * -(cos(PI / 180 * 36));
-    xd = x0 + r0 * -(sin(PI / 180 * 36));
-    yd = y0 - r0 * -(cos(PI / 180 * 36));
-    xe = x0 + r0 * sin(PI / 180 * 72);
-    ye = y0 + r0 * -(cos(PI / 180 * 72));
-    drawLine(xa, ya, xc, yc, color);
-    drawLine(xa, ya, xd, yd, color);
-    drawLine(xb, yb, xc, yc, color);
-	drawLine(xb, yb, xe, ye, color);
-	drawLine(xd, yd, xe, ye, color);
-}
-
-// Draw a ellipse outline
-void Adafruit_GFX::drawEllipse(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t a, uint16_t color) {
-    int16_t max_x = ((x1 > x2 ? x1 : x2) + a > 128 ? (x1 > x2 ? x1 : x2) + a : 128);
-    int16_t max_y = ((y1 > y2 ? y1 : y2) + a > 64 ? (y1 > y2 ? y1 : y2) + a : 64);
-    for (int16_t x = ((x1 > x2 ? x2 : x1) - a > 0 ? (x1 > x2 ? x2 : x1) - a : 0 ); x <= max_x; x++) {
-        for (int16_t y = ((y1 > y2 ? y2 : y1) - a > 0 ? (y1 > y2 ? y2 : y1) - a : 0); y <= max_y; y++) {
-            int32_t distance = sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1)) + sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2));
-            if (distance-a == a) {
-                writePixel(x, y, color);
-            }
-        }
-    }
-    endWrite();
-}
-
 
 // Draw a triangle
 void Adafruit_GFX::drawTriangle(int16_t x0, int16_t y0,
@@ -1388,5 +1368,4 @@ void GFXcanvas16::fillScreen(uint16_t color) {
         }
     }
 }
-
 
