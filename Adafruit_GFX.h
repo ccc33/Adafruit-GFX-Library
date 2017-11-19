@@ -1,6 +1,8 @@
 #ifndef _ADAFRUIT_GFX_H
 #define _ADAFRUIT_GFX_H
 
+#include<math.h>
+
 #if ARDUINO >= 100
  #include "Arduino.h"
  #include "Print.h"
@@ -52,6 +54,8 @@ class Adafruit_GFX : public Print {
   // These exist only with Adafruit_GFX (no subclass overrides)
   void
     drawMyPentagram(int16_t ox, int16_t oy, int16_t r, uint16_t color),
+    drawEllipse(int16_t x0, int16_t y0, int16_t a, 
+      int16_t b, uint16_t color),
     drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color),
     drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername,
       uint16_t color),
@@ -211,4 +215,3 @@ class GFXcanvas16 : public Adafruit_GFX {
 };
 
 #endif // _ADAFRUIT_GFX_H
-
