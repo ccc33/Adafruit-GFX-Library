@@ -33,8 +33,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "Adafruit_GFX.h"
 #include "glcdfont.c"
-#include <math.h>
-#define PI 3.1415926
 #ifdef __AVR__
   #include <avr/pgmspace.h>
 #elif defined(ESP8266) || defined(ESP32)
@@ -217,6 +215,55 @@ void Adafruit_GFX::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
     }
 }
 
+//Draw a ellipse outline
+void Adafruit_GFX::drawEllipse(int16_t x0, int16_t y0, int16_t a, 
+        int16_t b, uint16_t color) {
+    int16_t sq_a = a * a;
+    int16_t sq_b = b * b;
+    int16_t x = 0;
+    int16_t y = b;
+    int16_t d = 2 * sq_b - 2 * b * sq_a + sq_a;
+
+    startWrite();
+    writePixel(x0    , y0 + b, color);
+    writePixel(x0    , y0 - b, color);
+
+    
+    int P_x = (double)sq_a/sqrt((double)(sq_a+sq_b)) + 0.5;
+
+    while(x <= P_x){
+
+        if(d < 0)
+            d += 2 * sq_b * (2 * x + 3);
+        else
+            d += 2 * sq_b * (2 * x + 3) - 4 * sq_a * (y - 1);
+            y--;
+
+        x++;
+        writePixel(x0 + x, y0 + y, color);
+        writePixel(x0 - x, y0 + y, color);
+        writePixel(x0 + x, y0 - y, color);
+        writePixel(x0 - x, y0 - y, color);
+    }
+
+    d = sq_b * (x * x + x) + sq_a * (y * y - y) - sq_a * sq_b;
+    while(y >= 0){
+        writePixel(x0 + x, y0 + y, color);
+        writePixel(x0 - x, y0 + y, color);
+        writePixel(x0 + x, y0 - y, color);
+        writePixel(x0 - x, y0 - y, color);
+        y--;
+        if(d < 0){
+            x++;
+            d = d - 2 * sq_a * y - sq_a + 2 * sq_b * x + 2 * sq_b;
+         }
+        else
+            d = d - 2 * sq_a * y - sq_a;
+    }
+
+    endWrite();
+}
+
 // Draw a circle outline
 void Adafruit_GFX::drawCircle(int16_t x0, int16_t y0, int16_t r,
         uint16_t color) {
@@ -369,47 +416,6 @@ void Adafruit_GFX::fillRoundRect(int16_t x, int16_t y, int16_t w,
     fillCircleHelper(x+r    , y+r, r, 2, h-2*r-1, color);
     endWrite();
 }
-
-// Draw a Pentagram
-void Adafruit_GFX::drawPentagram(int16_t x0, int16_t y0,
-        int16_t r0, uint16_t color) {
-	int xa, ya;
-    int xb, yb;
-    int xc, yc;
-    int xd, yd;
-    int xe, ye;
-    xa = x0;
-    ya = y0 - r0;
-    xb = x0 - r0 * sin(PI / 180 * 72);
-    yb = y0 + r0 * -(cos(PI / 180 * 72));
-    xc = x0 - r0 * -(sin(PI / 180 * 36));
-    yc = y0 - r0 * -(cos(PI / 180 * 36));
-    xd = x0 + r0 * -(sin(PI / 180 * 36));
-    yd = y0 - r0 * -(cos(PI / 180 * 36));
-    xe = x0 + r0 * sin(PI / 180 * 72);
-    ye = y0 + r0 * -(cos(PI / 180 * 72));
-    drawLine(xa, ya, xc, yc, color);
-    drawLine(xa, ya, xd, yd, color);
-    drawLine(xb, yb, xc, yc, color);
-	drawLine(xb, yb, xe, ye, color);
-	drawLine(xd, yd, xe, ye, color);
-}
-
-// Draw a ellipse outline
-void Adafruit_GFX::drawEllipse(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t a, uint16_t color) {
-    int16_t max_x = ((x1 > x2 ? x1 : x2) + a > 128 ? (x1 > x2 ? x1 : x2) + a : 128);
-    int16_t max_y = ((y1 > y2 ? y1 : y2) + a > 64 ? (y1 > y2 ? y1 : y2) + a : 64);
-    for (int16_t x = ((x1 > x2 ? x2 : x1) - a > 0 ? (x1 > x2 ? x2 : x1) - a : 0 ); x <= max_x; x++) {
-        for (int16_t y = ((y1 > y2 ? y2 : y1) - a > 0 ? (y1 > y2 ? y2 : y1) - a : 0); y <= max_y; y++) {
-            int32_t distance = sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1)) + sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2));
-            if (distance-a == a) {
-                writePixel(x, y, color);
-            }
-        }
-    }
-    endWrite();
-}
-
 
 // Draw a triangle
 void Adafruit_GFX::drawTriangle(int16_t x0, int16_t y0,
@@ -1388,5 +1394,4 @@ void GFXcanvas16::fillScreen(uint16_t color) {
         }
     }
 }
-
 
